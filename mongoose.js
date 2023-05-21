@@ -6,7 +6,7 @@ dotenv.config({ path: "./.env" });
 
 const password = process.env.PASSWORD;
 
-const url = `mongodb+srv://Genci:${password}@cluster1.qmk7n43.mongodb.net/?retryWrites=true&w=majority`;
+const url = `${process.env.MONGODB_URI}?retryWrites=true&w=majority`;
 
 mongoose.set("strictQuery", false);
 mongoose.connect(url);
