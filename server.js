@@ -2,8 +2,6 @@ import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 
-import getNumbers from "./routes/persons.js";
-
 const app = express();
 
 export const persons = {
@@ -30,15 +28,52 @@ export const persons = {
     },
   ],
 };
+const randomId = () => Math.floor(Math.random() * 1000000);
 
 app.use(bodyParser.json());
-// app.use(cors());
 app.use(cors());
+app.get("/api/persons", (req, res) => {
+  res.send(persons);
+});
 
-app.use("/persons", getNumbers);
+app.get("/api/info", (req, res) => {
+  const time = new Date();
+  res.send(
+    `<p>Phonebook has info for ${persons.persons.length} people</p><p>${time}</p>`
+  );
+});
 
-app.get("/", (req, res) => {
-  res.send("Hello to Number API");
+app.get("/api/persons/:id", (req, res) => {
+  const id = Number(req.params.id);
+  const person = persons.persons.find((person) => person.id === id);
+  person ? res.send(person) : res.status(404).send();
+});
+
+app.delete("/api/persons/:id", (req, res) => {
+  const id = Number(req.params.id);
+  persons.persons = persons.persons.filter((person) => person.id !== id);
+  res.status(200).send({ message: "Deleted" });
+});
+app.post("/api/persons", (req, res) => {
+  const body = req.body;
+  console.log(body);
+  const nameExists = persons.persons.find(
+    (person) => person.name === body.name
+  );
+  nameExists &&
+    res.status(400).send({ error: "Person already exists" })(
+      !body.name || !body.number
+    ) &&
+    res.status(400).send({ error: "Name or number missing" });
+
+  const person = {
+    name: body.name,
+    number: body.number,
+    id: randomId(),
+  };
+  persons.persons = [...persons.persons, person];
+  console.log(persons.persons);
+  res.status(200).send(person);
 });
 
 const PORT = 5000;

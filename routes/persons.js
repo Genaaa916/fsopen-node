@@ -1,6 +1,5 @@
 import express from "express";
 
-import persons from "server.js";
 const getNumbers = async (req, res) => {
   try {
     const numbers = await Number.find();
