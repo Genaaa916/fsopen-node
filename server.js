@@ -1,6 +1,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
+import morgan from "morgan";
 
 const app = express();
 
@@ -29,7 +30,8 @@ export const persons = {
   ],
 };
 const randomId = () => Math.floor(Math.random() * 1000000);
-
+morgan.token("body", (req, res) => JSON.stringify(req.body));
+app.use(morgan(":method :url: :status :body - :response-time ms"));
 app.use(bodyParser.json());
 app.use(cors());
 app.get("/api/persons", (req, res) => {
@@ -56,7 +58,6 @@ app.delete("/api/persons/:id", (req, res) => {
 });
 app.post("/api/persons", (req, res) => {
   const body = req.body;
-  console.log(body);
   const nameExists = persons.persons.find(
     (person) => person.name === body.name
   );
@@ -72,7 +73,6 @@ app.post("/api/persons", (req, res) => {
     id: randomId(),
   };
   persons.persons = [...persons.persons, person];
-  console.log(persons.persons);
   res.status(200).send(person);
 });
 
