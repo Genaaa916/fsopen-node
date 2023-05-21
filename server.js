@@ -34,6 +34,8 @@ morgan.token("body", (req, res) => JSON.stringify(req.body));
 app.use(morgan(":method :url: :status :body - :response-time ms"));
 app.use(bodyParser.json());
 app.use(cors());
+app.use(express.static("build"));
+
 app.get("/api/persons", (req, res) => {
   res.send(persons);
 });
