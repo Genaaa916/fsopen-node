@@ -22,11 +22,10 @@ app.get("/api/persons", async (req, res) => {
   }
 });
 
-app.get("/api/info", (req, res) => {
+app.get("/api/info", async (req, res) => {
   const time = new Date();
-  res.send(
-    `<p>Phonebook has info for ${persons.persons.length} people</p><p>${time}</p>`
-  );
+  const length = await Person.find({}).length;
+  res.send(`<p>Phonebook has info for ${length} people</p><p>${time}</p>`);
 });
 
 app.get("/api/persons/:id", async (req, res) => {
