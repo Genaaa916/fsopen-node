@@ -68,11 +68,10 @@ app.post("/api/persons", async (req, res) => {
   res.status(code).send({ message });
 });
 
-app.put("/api/persons/:id", async (req, res) => {
-  const id = req.params.id;
+app.put("/api/persons/", async (req, res) => {
   const body = req.body;
   try {
-    await Person.findByIdAndUpdate(id, body);
+    await Person.findOneAndUpdate({ name: body.name }, { number: body.number });
     res.status(200).send({ message: "Updated" });
   } catch (err) {
     res.status(404).send({ message: "Not found" });
