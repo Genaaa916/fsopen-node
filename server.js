@@ -50,7 +50,7 @@ app.post("/api/persons", async (req, res) => {
   const body = req.body;
   const nameExists = await Person.find({ name: body.name });
   const [message, code] = nameExists.length
-    ? ["Name already exists", 400]
+    ? ["Name already exists", 409]
     : !body.name || !body.number
     ? ["Name or number missing", 400]
     : ["Created", 201];
@@ -62,6 +62,17 @@ app.post("/api/persons", async (req, res) => {
     }));
 
   res.status(code).send({ message });
+});
+
+app.put("/api/persons/:id", async (req, res) => {
+  const id = req.params.id;
+  const body = req.body;
+  try {
+    Person.findByIdAndUpdate(id, body);
+    res.status(200).send({ message: "Updated" });
+  } catch (err) {
+    res.status(404).send({ message: "Not found" });
+  }
 });
 
 const PORT = process.env.PORT || 3001;
