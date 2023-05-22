@@ -2,42 +2,20 @@ import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import morgan from "morgan";
+import Person from "./mongoose.js";
 
 const app = express();
 
-export const persons = {
-  persons: [
-    {
-      name: "Arto Hellas",
-      number: "040-123456",
-      id: 1,
-    },
-    {
-      name: "Ada Lovelace",
-      number: "39-44-5323523",
-      id: 2,
-    },
-    {
-      name: "Dan Abramov",
-      number: "12-43-234345",
-      id: 3,
-    },
-    {
-      name: "Mary Poppendieck",
-      number: "39-23-6423122",
-      id: 4,
-    },
-  ],
-};
-const randomId = () => Math.floor(Math.random() * 1000000);
+const isFalsy = (value) => !value;
+
 morgan.token("body", (req, res) => JSON.stringify(req.body));
 app.use(morgan(":method :url: :status :body - :response-time ms"));
 app.use(bodyParser.json());
 app.use(cors());
 app.use(express.static("build"));
 
-app.get("/api/persons", (req, res) => {
-  res.send(persons);
+app.get("/api/persons", async (req, res) => {
+  res.send(await Person.find({}));
 });
 
 app.get("/api/info", (req, res) => {
@@ -47,35 +25,43 @@ app.get("/api/info", (req, res) => {
   );
 });
 
-app.get("/api/persons/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const person = persons.persons.find((person) => person.id === id);
-  person ? res.send(person) : res.status(404).send();
+app.get("/api/persons/:id", async (req, res) => {
+  const id = req.params.id;
+  try {
+    const person = await Person.findById(id);
+    res.status(200).send(person);
+  } catch (err) {
+    console.log(err);
+    res.status(404).send({ message: "Not found" });
+  }
 });
 
-app.delete("/api/persons/:id", (req, res) => {
-  const id = Number(req.params.id);
-  persons.persons = persons.persons.filter((person) => person.id !== id);
-  res.status(200).send({ message: "Deleted" });
+app.delete("/api/persons/:id", async (req, res) => {
+  const id = req.params.id;
+  try {
+    await Person.findByIdAndDelete(id);
+    res.status(200).send({ message: "Deleted" });
+  } catch (err) {
+    res.status(404).send({ message: "Not found" });
+  }
 });
-app.post("/api/persons", (req, res) => {
+
+app.post("/api/persons", async (req, res) => {
   const body = req.body;
-  const nameExists = persons.persons.find(
-    (person) => person.name === body.name
-  );
-  nameExists &&
-    res.status(400).send({ error: "Person already exists" })(
-      !body.name || !body.number
-    ) &&
-    res.status(400).send({ error: "Name or number missing" });
+  const nameExists = await Person.find({ name: body.name });
+  const [message, code] = nameExists.length
+    ? ["Name already exists", 400]
+    : !body.name || !body.number
+    ? ["Name or number missing", 400]
+    : ["Created", 201];
+  console.log(message, code);
+  code === 201 &&
+    (await Person.create({
+      name: body.name,
+      number: body.number,
+    }));
 
-  const person = {
-    name: body.name,
-    number: body.number,
-    id: randomId(),
-  };
-  persons.persons = [...persons.persons, person];
-  res.status(200).send(person);
+  res.status(code).send({ message });
 });
 
 const PORT = process.env.PORT || 3001;
