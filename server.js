@@ -15,7 +15,11 @@ app.use(cors());
 app.use(express.static("build"));
 
 app.get("/api/persons", async (req, res) => {
-  res.send(await Person.find({}));
+  try {
+    res.status(200).send(await Person.find({}));
+  } catch (err) {
+    res.status(404).send({ message: "Not found" });
+  }
 });
 
 app.get("/api/info", (req, res) => {
@@ -68,13 +72,12 @@ app.put("/api/persons/:id", async (req, res) => {
   const id = req.params.id;
   const body = req.body;
   try {
-    Person.findByIdAndUpdate(id, body);
+    await Person.findByIdAndUpdate(id, body);
     res.status(200).send({ message: "Updated" });
   } catch (err) {
     res.status(404).send({ message: "Not found" });
   }
 });
-
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => console.log(`Server running on port: ${PORT}`));
