@@ -4,3 +4,4 @@ I'll probably read the documentation more thoroughly and come back to this proje
 The main point is the website works as intended.
 The non-minified front-end code is in the other repository called 'fullstackopen'.
 Most likely in branch osa-2.16. 
+The stack is also hosted on Render.
