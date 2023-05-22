@@ -24,8 +24,10 @@ app.get("/api/persons", async (req, res) => {
 
 app.get("/api/info", async (req, res) => {
   const time = new Date();
-  const length = await Person.find({}).length;
-  res.send(`<p>Phonebook has info for ${length} people</p><p>${time}</p>`);
+  const people = await Person.find({});
+  res.send(
+    `<p>Phonebook has info for ${people.length} people</p><p>${time}</p>`
+  );
 });
 
 app.get("/api/persons/:id", async (req, res) => {
